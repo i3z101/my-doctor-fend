@@ -20,8 +20,3 @@
  - expo start [**MAKE SURE YOU UNCOMMENT webRTC PART OR IT WILL NOT WORK WITH EXPO GO**
  - expo start --dev-client
  - Scan qr code or run it on you emulator
-
-## Create files and folders
-
-The file explorer is accessible using the button in left corner of the navigation bar. You can create a new file by clicking the **New file** button in the file explorer. You can also create folders by clicking the **New folder** button.
-
