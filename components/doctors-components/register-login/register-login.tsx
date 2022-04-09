@@ -407,7 +407,7 @@ const RegisterLoginPage: FC<NavigationType> = ({navigation}) => {
         {steps > -1 &&
             <Animated.View entering={SlideInRight.duration(700)} exiting={SlideOutRight.duration(100)}>
             <ScrollView style={{height: steps == 0 ? 50 : focused ? 100 : utils.deviceHeight <= 667 ? 250 : Platform.OS == 'ios' ? 250 : 300}}>
-            <UnderlinedTextInput placeholder="*Doctor phone without +" validationText={formValue.doctorPhone.validation}
+            <UnderlinedTextInput placeholder="*Doctor phone with country code without +" validationText={formValue.doctorPhone.validation}
                 attributes={{ value:formValue.doctorPhone.value, onChangeText:(value)=>onChangeHandler(value, "doctorPhone"),
                 onFocus: ()=>setFocuesd(true), onEndEditing: ()=> setFocuesd(false),
                 returnKeyType:"default", maxLength:12, keyboardType:'phone-pad', enablesReturnKeyAutomatically:true}} />
