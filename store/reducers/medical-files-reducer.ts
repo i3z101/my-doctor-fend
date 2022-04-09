@@ -1,6 +1,6 @@
 import { Reducer } from "react"
 import {MedicalFileReducerType} from '../../helper/types';
-import { ADD_ALL_MEDICAL_FILES, ADD_MEDICAL_FILE, UPDATE_MEDICAL_FILE } from "../actions/medical-files-actions";
+import { ADD_ALL_MEDICAL_FILES, ADD_MEDICAL_FILE, CLEAR_MEDICAL_FILES, UPDATE_MEDICAL_FILE } from "../actions/medical-files-actions";
 
 const initState: MedicalFileReducerType = {
     medicalFiles: []
@@ -26,6 +26,10 @@ const medicalFilesReducer: Reducer<MedicalFileReducerType, any> = (state= initSt
             return {
                 ...state,
                 medicalFiles: updatedMedicalFileCopy
+            }
+        case CLEAR_MEDICAL_FILES:
+            return {
+                medicalFiles: []
             }
     }
     return state;

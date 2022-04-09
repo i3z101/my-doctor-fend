@@ -6,7 +6,7 @@ import Medicine from "../../../assets/imgs-icon/medicines.svg";
 import GeneralInfoText from "../reuseable/general-info-text";
 import CardIconsContainer from "../../shared/card-icons-container";
 import UnderlinedTextInput from "../reuseable/underlined-text-input";
-import { Alert, Button, Dimensions, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {Dimensions, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { MaterialIcons } from '@expo/vector-icons';
 import colors from "../../../assets/colors";
 import BottomSheet from '@gorhom/bottom-sheet';
@@ -15,11 +15,15 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import ReversedButtons from "../reuseable/reversed-buttons";
 import * as Calendar from 'expo-calendar';
 import { validateStringOnChange } from "../../../helper/validations";
-import { ListDatesType } from "../../../helper/types";
+import { ListDatesType, ResponseType } from "../../../helper/types";
 import CustomBottomSheet from "../reuseable/custom-bottom-sheet";
 import utils from "../../../helper/utils";
 import { useDispatch, useSelector } from "react-redux";
 import medicinesActions from "../../../store/actions/medicines-actions";
+import generalActions from "../../../store/actions/general-actions";
+import errorHandler from "../../../helper/error-handler";
+import Spinner from "../../shared/spinner";
+import Button from "../reuseable/button";
 
 
 
@@ -27,6 +31,8 @@ import medicinesActions from "../../../store/actions/medicines-actions";
 
 const AddMedicinePage: FC<{navigation: NavigationProp<any>, route: Route<any>}> = ({navigation, route}) => {
     const generalReducer = useSelector((state: any)=> state.generalReducer);
+    const patientAuthReducer = useSelector((state: any)=>state.patientAuth);
+    const appointmentsReducer = useSelector((state: any)=>state.appointments);
     //For update purpose
     const {medicineInfo} = route.params as any
     const dispatch = useDispatch();
@@ -37,7 +43,7 @@ const AddMedicinePage: FC<{navigation: NavigationProp<any>, route: Route<any>}> 
     const numberOfTabletsRef = useRef<BottomSheet>(null);
     const numberOfTimesPerDayRef = useRef<BottomSheet>(null);
     const numberOfDaysRef = useRef<BottomSheet>(null);
-
+    const responseBottomSheet = useRef<BottomSheet>(null);
 
     const [showTimePicker, setShowTimePicker] = useState<boolean>(false);
 
@@ -54,8 +60,14 @@ const AddMedicinePage: FC<{navigation: NavigationProp<any>, route: Route<any>}> 
         startDate: medicineInfo ? medicineInfo.startDate : '',
     })
 
+    const [responseHandler, setRsponseHandler ] = useState<ResponseType>({
+        message: "",
+        statusCode: 0,
+        validations: []
+    });
+
     const onChangeHandler = (value: string, name: string): void => {
-        validateStringOnChange(value, "Medicine name", setMedicineData, "medicineName", true, 3, 50, true, true, false);
+        validateStringOnChange(value, "Medicine name", setMedicineData, "medicineName", true, 3, 150, true, true, false);
         setMedicineData((prevState: any)=>({
             ...prevState,
             [name]: {
@@ -181,8 +193,8 @@ const AddMedicinePage: FC<{navigation: NavigationProp<any>, route: Route<any>}> 
         return defaultCalendar.source;
     }
 
-    const deleteEvent = async() => {
-        await Calendar.deleteCalendarAsync(String(medicineInfo.eventId));
+    const deleteEvent = async(eventId?: string|number) => {
+        await Calendar.deleteCalendarAsync(String(eventId ? eventId : medicineInfo.eventId));
     }
 
     const createCalendarReminder = async (listDates: ListDatesType[]): Promise<string> => {
@@ -273,51 +285,129 @@ const AddMedicinePage: FC<{navigation: NavigationProp<any>, route: Route<any>}> 
 
     }
 
-
-    const submitHandler = async(): Promise<any> => {
+    const updateHandler = async (): Promise<any> => {
+        dispatch(generalActions.startSend());
         const listDates = calcDate();
-
         let eventId: string|number = '';
-
-        if(Platform.OS == 'ios') {
-            const calendarPermission = await Calendar.requestCalendarPermissionsAsync();
-            const reminderPermission = await Calendar.requestRemindersPermissionsAsync();
-            if(calendarPermission.status == "granted" && reminderPermission.status == "granted")
-            eventId = await createCalendarReminder(listDates);
-        }else{
-            const {status} = await Calendar.requestCalendarPermissionsAsync();
-            if(status == "granted") 
-            eventId = await createCalendarEvent(listDates);
-        }
-    
-        if(!medicineInfo) {
-            dispatch(medicinesActions.addMedicine({
-                medicineId: Math.ceil(Math.random() * 1000000000).toString(20),
+        try {
+            if(Platform.OS == 'ios') {
+                const calendarPermission = await Calendar.requestCalendarPermissionsAsync();
+                const reminderPermission = await Calendar.requestRemindersPermissionsAsync();
+                if(calendarPermission.status == "granted" && reminderPermission.status == "granted")
+                eventId = await createCalendarReminder(listDates);
+            }else{
+                const {status} = await Calendar.requestCalendarPermissionsAsync();
+                if(status == "granted") 
+                eventId = await createCalendarEvent(listDates);
+            }
+            const data = await utils.sendRequest('PATCH', `${utils.BACKEND_URL}/patients/medicines/update-medicine`, {
+                medicineId: medicineInfo.medicineId,
                 eventId: eventId,
-                medicineName: medicineData.medicineName.value,
+                medicineName: medicineData.medicineName.value.trim(),
                 shouldTakeItEvery: medicineData.shouldTakeItEvery,
                 timesPerDay: medicineData.timesPerDay,
                 tabletsPerTime: medicineData.tabletsPerTime,
                 numberOfDays: medicineData.numberOfDays,
-                startDate: medicineData.startDate,
-                startTime: medicineData.startTime,
+                startDate: medicineData.startDate.trim(),
+                startTime: medicineData.startTime.trim(),
                 listDates: listDates
-            }))
-        }else {
+            }, {'Authorization': `BEARER ${patientAuthReducer.authToken}`})
+            const response: ResponseType = await data.json();
+            
+            if(response.statusCode != 200) {
+                errorHandler(response.message, response.statusCode, response.validations ? response.validations : [], eventId)
+            }
             dispatch(medicinesActions.updateMedicine({
                 medicineId: medicineInfo.medicineId,
                 eventId: eventId,
-                medicineName: medicineData.medicineName.value,
+                medicineName: medicineData.medicineName.value.trim(),
                 shouldTakeItEvery: medicineData.shouldTakeItEvery,
                 timesPerDay: medicineData.timesPerDay,
                 tabletsPerTime: medicineData.tabletsPerTime,
                 numberOfDays: medicineData.numberOfDays,
-                startDate: medicineData.startDate,
-                startTime: medicineData.startTime,
+                startDate: medicineData.startDate.trim(),
+                startTime: medicineData.startTime.trim(),
                 listDates: listDates
             }))
+            dispatch(generalActions.endSend());
+            utils.showAlertMessage("Medicine updated 😎", response.message, [
+                {
+                    style: 'default',
+                    text: "Ok, Thank you",
+                    onPress: ()=> navigation.goBack()
+                }
+            ])
+
+        }catch(err: any) {
+            await deleteEvent(err.extraProps)
+            dispatch(generalActions.endSend())
+            setRsponseHandler(err)
+            responseBottomSheet.current?.snapToIndex(1)
         }
-        navigation.navigate("my-medicines")
+        
+    }
+
+
+    const submitHandler = async(): Promise<any> => {
+        dispatch(generalActions.startSend());
+        const listDates = calcDate();
+        let eventId: string|number = '';
+
+        try {
+            if(Platform.OS == 'ios') {
+                const calendarPermission = await Calendar.requestCalendarPermissionsAsync();
+                const reminderPermission = await Calendar.requestRemindersPermissionsAsync();
+                if(calendarPermission.status == "granted" && reminderPermission.status == "granted")
+                eventId = await createCalendarReminder(listDates);
+            }else{
+                const {status} = await Calendar.requestCalendarPermissionsAsync();
+                if(status == "granted") 
+                eventId = await createCalendarEvent(listDates);
+            }
+            const data = await utils.sendRequest('POST', `${utils.BACKEND_URL}/patients/medicines/add-medicine`, {
+                eventId: eventId,
+                medicineName: medicineData.medicineName.value.trim(),
+                shouldTakeItEvery: medicineData.shouldTakeItEvery,
+                timesPerDay: medicineData.timesPerDay,
+                tabletsPerTime: medicineData.tabletsPerTime,
+                numberOfDays: medicineData.numberOfDays,
+                startDate: medicineData.startDate.trim(),
+                startTime: medicineData.startTime.trim(),
+                listDates: listDates
+            }, {'Authorization': `BEARER ${patientAuthReducer.authToken}`})
+            const response: ResponseType = await data.json();
+            
+            if(response.statusCode != 201) {
+                errorHandler(response.message, response.statusCode, response.validations ? response.validations : [], eventId)
+            }
+            dispatch(medicinesActions.addMedicine({
+                medicineId: response.medicineId,
+                eventId: eventId,
+                medicineName: medicineData.medicineName.value.trim(),
+                shouldTakeItEvery: medicineData.shouldTakeItEvery,
+                timesPerDay: medicineData.timesPerDay,
+                tabletsPerTime: medicineData.tabletsPerTime,
+                numberOfDays: medicineData.numberOfDays,
+                startDate: medicineData.startDate.trim(),
+                startTime: medicineData.startTime.trim(),
+                listDates: listDates
+            }))
+            dispatch(generalActions.endSend());
+            utils.showAlertMessage("Medicine saved 😎", response.message, [
+                {
+                    style: 'default',
+                    text: "Ok, Thank you",
+                    onPress: ()=> navigation.goBack()
+                }
+            ])
+
+        }catch(err: any) {
+            await deleteEvent(err.extraProps)
+            dispatch(generalActions.endSend())
+            setRsponseHandler(err)
+            responseBottomSheet.current?.snapToIndex(1)
+        }
+        
     }
     
 
@@ -331,21 +421,33 @@ const AddMedicinePage: FC<{navigation: NavigationProp<any>, route: Route<any>}> 
                 validationText={medicineData.medicineName.validation} 
                 attributes={{value:medicineData.medicineName.value, onChangeText:(value)=>onChangeHandler(value, "medicineName")}} />
                 <View style={styles.innerContainer}>
-                    <TouchableOpacity onPress={()=>numberOfTimesPerDayRef.current?.snapToIndex(1)}>
+                    <TouchableOpacity onPress={()=>{
+                            Keyboard.dismiss()
+                            numberOfTimesPerDayRef.current?.snapToIndex(1)
+                        }
+                    }>
                         <View style={styles.labelContainer}>
                             <Text style={styles.labelText}>Times Per Day</Text>
                             <MaterialIcons style={styles.arrowDown} name="keyboard-arrow-down" size={16} color="black" />
                         </View>
                         <Text style={styles.centeredText}>{medicineData.timesPerDay == 0 ? null : medicineData.timesPerDay + " time(s)"}</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={()=>numberOfTabletsRef.current?.snapToIndex(1)}>
+                    <TouchableOpacity onPress={()=>{
+                        Keyboard.dismiss()
+                        numberOfTabletsRef.current?.snapToIndex(1)
+                    }
+                    }>
                         <View style={styles.labelContainer}>
                             <Text style={styles.labelText}>Tablets Per time</Text>
                             <MaterialIcons style={styles.arrowDown} name="keyboard-arrow-down" size={16} color="black" />
                         </View>
                         <Text style={styles.centeredText}>{medicineData.tabletsPerTime == 0 ? null : medicineData.tabletsPerTime + " tablet(s)"}</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={()=>shouldTakeItEveryInNumberRef.current?.snapToIndex(1)}>
+                    <TouchableOpacity onPress={()=>{
+                            Keyboard.dismiss()
+                            shouldTakeItEveryInNumberRef.current?.snapToIndex(1)
+                        }
+                    }>
                         <View style={styles.labelContainer}>
                             <Text style={styles.labelText}>Take it Every</Text>
                             <MaterialIcons style={styles.arrowDown} name="keyboard-arrow-down" size={16} color="black" />
@@ -366,7 +468,11 @@ const AddMedicinePage: FC<{navigation: NavigationProp<any>, route: Route<any>}> 
                         minimumDate = {new Date()}
                         style={{height: 40, borderBottomWidth:2, borderBottomColor: colors.mainColor, marginBottom: '5%'}}
                     />
-                     <TouchableOpacity onPress={()=>numberOfDaysRef.current?.snapToIndex(1)}>
+                     <TouchableOpacity onPress={()=>{
+                             Keyboard.dismiss()
+                             numberOfDaysRef.current?.snapToIndex(1)
+                        }
+                        }>
                         <View style={{...styles.labelContainer, borderBottomWidth:2, borderBottomColor: colors.mainColor, marginBottom: '5%', height: 40}}>
                             {medicineData.numberOfDays != 0 ? 
                                 <Text style={styles.centeredText}>{medicineData.numberOfDays + " day(s)"}</Text>
@@ -394,13 +500,15 @@ const AddMedicinePage: FC<{navigation: NavigationProp<any>, route: Route<any>}> 
                 />
              </View>
              <ReversedButtons 
+                        children = {generalReducer.isSending ? <Spinner /> : null}
                         btnText= {medicineInfo ? "Update" : "Create" }
                         btnTextTwo={medicineInfo ? "Delete" : "Cancel" }
-                        btnLeftAttribute={{disabled: medicineData.medicineName.value.length < 1 || medicineData.medicineName.validation.length > 0 || 
+                        btnLeftAttribute={{disabled:generalReducer.isSending ? true : medicineData.medicineName.value.length < 1 || medicineData.medicineName.validation.length > 0 || 
                             medicineData.timesPerDay == 0 || medicineData.tabletsPerTime == 0 || medicineData.shouldTakeItEvery == 0 ||
                             medicineData.startDate == "" ||  medicineData.numberOfDays == 0 ||
                             medicineData.startTime == "" ? true : false}}
-                        onPressOne={()=>submitHandler()}
+                        btnRightAttribute = {{disabled: generalReducer.isSending ? true : false}}
+                        onPressOne={()=>medicineInfo ? updateHandler() : submitHandler()}
                         onPressTwo={()=>navigation.goBack()}
                         btnContainerStyleOne={{...styles.btnLeftContainer, 
                         backgroundColor: medicineData.medicineName.value.length < 1 || medicineData.medicineName.validation.length > 0 || 
@@ -496,6 +604,21 @@ const AddMedicinePage: FC<{navigation: NavigationProp<any>, route: Route<any>}> 
             })}
         </View>
     </CustomBottomSheet>
+    <CustomBottomSheet bottomSheetProps={{
+            snapPoints: {value: ["25%", "65%"]}, index: -1, enableContentPanningGesture:false, enableHandlePanningGesture:false, children: ""}}
+            scrollViewProps={{style: {height:55}}}
+            refValue={responseBottomSheet}
+            title= ""
+            titleStyle={styles.bottomsheetLabel}
+            scrollbale={true}>
+           <View>
+            <Text style={{textAlign:'center', fontWeight:'600', fontSize:17, color:'tomato'}}>{responseHandler.message}</Text>
+            {responseHandler.validations.length > 0 && responseHandler.validations.map((value: string)=> {
+                return <Text key={value} style={{fontWeight:'600', fontSize: 13, color: 'tomato', paddingLeft:'3%', marginTop: '5%'}}>#{value}</Text>
+            })}
+            <Button buttonText="Ok, i will handle that" onPress={()=>responseBottomSheet.current?.close()} buttonContainerStyle={styles.validationBottomSheetBtn} buttonTextStyle={styles.validationBottomSheetBTxt} />
+        </View>
+        </CustomBottomSheet>
     </KeyboardAvoidingView> 
 }
 
@@ -566,6 +689,18 @@ const styles = StyleSheet.create({
         marginTop: utils.deviceHeight <= 667 ? Platform.OS == 'ios' ? '15%' : '5%' : '30%',
         width:'40%'
     },
+    validationBottomSheetBtn: {
+        backgroundColor: colors.secondColor,
+        width: '50%',
+        padding: '2%',
+        borderRadius: 8,
+        alignSelf: 'center',
+        marginLeft: '10%',
+        marginTop: '10%'
+    },
+    validationBottomSheetBTxt: {
+        color: colors.thirdColor
+    }
 })
 
 export default AddMedicinePage

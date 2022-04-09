@@ -5,6 +5,7 @@ export const CHANGE_ACCOUNT_TYPE_PATIENT = "CHANGE_ACCOUNT_TYPE_PATIENT";
 export const START_SEND = "START_SEND";
 export const END_SEND = "END_SEND";
 export const ADD_ALL_NUMBERS = "ADD_ALL_NUMBERS";
+export const CLEAR_GENERAL_REDUCER = "CLEAR_GENERAL_REDUCER";
 
 export default {
     changeAccountTypeToDoctor: (): AnyAction=> {
@@ -30,6 +31,12 @@ export default {
     addAllNumbers: (): AnyAction => {
         return {
             type: ADD_ALL_NUMBERS
+        }
+    },
+
+    clearGeneralReducer: (): AnyAction => {
+        return {
+            type: CLEAR_GENERAL_REDUCER
         }
     }
 

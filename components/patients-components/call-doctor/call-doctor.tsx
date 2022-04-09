@@ -89,7 +89,7 @@ const CallDoctorPage: FC<{navigation: NavigationProp<any>}> = ({navigation}) => 
 
 const styles = StyleSheet.create({
     cardContainer: {
-        marginTop: '17%'
+        marginTop: '18%'
     },
     listsContainer: {
         width:'100%', 

@@ -7,10 +7,16 @@ import React from "react";
 import { Button, Text } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import colors from "../../assets/colors";
+import MyInfoPage from "../../components/doctors-components/my-info/my-info";
 import Index from "../../pages/doctors";
+import CallPatient from "../../pages/doctors/appointments/call-patient";
 import DoctorAppointments from "../../pages/doctors/appointments/doctor-appointments";
+import Emergency from "../../pages/doctors/emergency/emergency";
+import MedicalFiles from "../../pages/doctors/medical-files/medical-files";
 import RegisterLoginDoctor from "../../pages/doctors/register-login/register-login";
+import appointmentsActions from "../../store/actions/appointments-actions";
 import { doctorAuthActions } from "../../store/actions/auth-actions";
+import medicalFilesActions from "../../store/actions/medical-files-actions";
 
 const Stack = createNativeStackNavigator();
 
@@ -29,24 +35,18 @@ const NavStack = () => {
             <Stack.Screen name="doctor-appointments" component={DoctorAppointments} options={{
                 headerShown: false
             }}/>
-            {/* <Stack.Screen name="appointment-date" component={AppointmentDate} options={{
-                headerShown: false
-            }}/>
-            <Stack.Screen name="appointment-confirmation" component={AppointmentConfirmation} options={{
-                headerShown: false
-            }}/>
-            <Stack.Screen name="call-doctor" component={CallDoctor} options={{
-                headerShown: false
-            }}/>
-            <Stack.Screen name="e-pharmacy" component={Epharmacy} options={{
+            <Stack.Screen name="call-patient" component={CallPatient} options={{
                 headerShown: false
             }}/>
             <Stack.Screen name="medical-files" component={MedicalFiles} options={{
                 headerShown: false
             }}/>
-            <Stack.Screen name="add-medical-file" component={AddMedicalFile} options={{
+            <Stack.Screen name="emergency" component={Emergency} options={{
                 headerShown: false
-            }}/> */}
+            }}/>
+            <Stack.Screen name="my-info" component={MyInfoPage} options={{
+                headerShown: false
+            }}/>
         </Stack.Group>
         <Stack.Screen name="register-login" component={RegisterLoginDoctor} options={{
                 headerShown: false
@@ -62,7 +62,8 @@ const NavDrawer = () => {
     const logoutHandler = async(navigation: DrawerNavigationHelpers) => {
         await AsyncStorage.removeItem("doctor-auth");
         dispatch(doctorAuthActions.logout());
-        dispatch(DrawerActions.closeDrawer());
+        dispatch(appointmentsActions.clearAppointmentsAndDoctors());
+        dispatch(medicalFilesActions.clearMedicalFiles());
         navigation.dispatch(StackActions.replace('register-login'))
     }
 

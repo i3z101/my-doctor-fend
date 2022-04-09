@@ -3,4 +3,4 @@ module.exports = ({ config }) => {
     // Expose CI env variables to the app
     config.extra.CI = process.env.CI;
     return config;
-  };
+};

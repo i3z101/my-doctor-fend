@@ -23,8 +23,9 @@ export type DoctorType = {
     doctorClinic: string,
     doctorPhoto: string,
     doctorBio: string,
-    doctorPrice: number,
-    acquiredAppointments: AcquiredAppointmentsType[]
+    doctorPricePerHour: number,
+    acquiredAppointments: AcquiredAppointmentsType[],
+    pushToken: string
 }
 
 export type DoctorsTimesType = {
@@ -43,12 +44,11 @@ export type MedicalFileType = {
     disease: string | null,
     doctor: {
         doctorId: string | null,
-        doctorName: string | null
+        doctorFullName: string | null
     },
     clinic: string,
-    patient: string | null,
-    medicine: string | null,
-    createdAt: string | null
+    patientName: string | null,
+    medicine: string | null
 }
 
 export type MedicalFileReducerType = {
@@ -91,8 +91,14 @@ export type AppointmentType = {
     appointmentDate: string,
     appointmentTime: string,
     eventId: string|number,
-    billId: string,
-    patientName: string
+    bill: {
+        billId: string,
+        status: string
+    },
+    patientName: string,
+    roomId: string,
+    billPath: string,
+    [extraProps: string]: any
 }
 
 export type MedicineType = {
@@ -169,7 +175,8 @@ export type DoctorAuthType = {
     doctorGraduatedFrom: string,
     acquiredAppointments: AcquiredAppointmentsType[],
     isAccountActive: boolean,
-    updatePermitted: string
+    updatePermitted: string,
+    pushToken: string
 }
 
 export type ResponseType = {
@@ -187,6 +194,13 @@ export type GeneralReducerType = {
     numberOfTabletsPerTime: number[],
     numberOfTimesPerDay: number[],
     numberOfDays: number[]
+}
+
+export type DoctorEmergencyList = {
+    doctorSocketId: string,
+    doctorFullName: string,
+    roomId: string,
+    pushToken: string
 }
 
 export type MethodType = "GET" | "POST" | "PATCH" | "DELETE" | "POSTFILE"

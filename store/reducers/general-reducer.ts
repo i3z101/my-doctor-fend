@@ -1,7 +1,7 @@
 import { Reducer } from "react"
 import { AnyAction } from "redux"
 import { GeneralReducerType } from "../../helper/types"
-import {ADD_ALL_NUMBERS, CHANGE_ACCOUNT_TYPE_DOCTOR, CHANGE_ACCOUNT_TYPE_PATIENT, END_SEND, START_SEND } from "../actions/general-actions"
+import {ADD_ALL_NUMBERS, CHANGE_ACCOUNT_TYPE_DOCTOR, CHANGE_ACCOUNT_TYPE_PATIENT, CLEAR_GENERAL_REDUCER, END_SEND, START_SEND } from "../actions/general-actions"
 
 
 
@@ -56,6 +56,15 @@ const generalReducer: Reducer<GeneralReducerType, AnyAction> = (state= initState
                 numberOfTabletsPerTime: numberOfTabletsPerTimeCopy,
                 numberOfTimesPerDay: numberOfTimesPerDayCopy,
                 numberOfDays: numberOfDaysCopy
+            }
+        case CLEAR_GENERAL_REDUCER:
+            return {
+                accountType: "patient",
+                isSending: false,
+                shouldTakeItEveryInNumber: [],
+                numberOfTabletsPerTime: [],
+                numberOfTimesPerDay: [],
+                numberOfDays: []
             }
         default:
             return state

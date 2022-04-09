@@ -27,11 +27,12 @@ const rootReducers = combineReducers({
 export const store = createStore(rootReducers);
 
 const App: FC<NavigationType> = ({navigation}) => {
-  // LogBox.ignoreLogs(["Setting a timer for a long"]);
+  // LogBox.ignoreLogs(["[Unhandled promise rejection: Error: Error processing ICE candidate]"]);
+  // LogBox.ignoreLogs(["Failed to set remote answer sdp"]);
 
   return (
     <Provider store={store}>
-      <SafeAreaView style={{flex:1, marginTop: Platform.OS == 'android' ? utils.deviceHeight <= 667 ? 0 : '-10%' : 0}}>
+      <SafeAreaView style={{flex:1, marginTop: Platform.OS == 'android' ? utils.deviceHeight <= 667 ? 0 : 0 : 0}}>
         <StatusBar style="auto"/>
         <NavContainer/>
       </SafeAreaView>

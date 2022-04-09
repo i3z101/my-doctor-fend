@@ -60,8 +60,8 @@ const showAlertMessage = (title:string , message:string|number|any, customButton
 export default {
     deviceWidth: Dimensions.get('screen').width,
     deviceHeight: Dimensions.get('screen').height,
-    BACKEND_URL: "https://bb06-2001-16a2-cb25-a800-f1da-b62e-7f94-42ee.ngrok.io/api/v1",
-    RAW_BACKEND_URL: "https://bb06-2001-16a2-cb25-a800-f1da-b62e-7f94-42ee.ngrok.io",
+    BACKEND_URL: "https://2a7c-2001-16a2-cb2d-c700-348c-58ee-120f-326.ngrok.io/api/v1",
+    RAW_BACKEND_URL: "https://2a7c-2001-16a2-cb2d-c700-348c-58ee-120f-326.ngrok.io",
     sendRequest,
     showAlertMessage
 }

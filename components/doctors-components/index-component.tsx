@@ -25,6 +25,7 @@ import FixedContainer from "../patients-components/reuseable/fixed-container";
 import GeneralInfoText from "../patients-components/reuseable/general-info-text";
 import ImageMenu from "../patients-components/reuseable/image-menu";
 import errorHandler from "../../helper/error-handler";
+import medicalFilesActions from "../../store/actions/medical-files-actions";
 
 
 const IndexComponent: FC<{navigation:NavigationProp<any>}> = ({navigation})=> {    
@@ -37,6 +38,7 @@ const IndexComponent: FC<{navigation:NavigationProp<any>}> = ({navigation})=> {
             const doctorAuthInfo = await AsyncStorage.getItem("doctor-auth");
             if(doctorAuthInfo) {
                 const convertedObjectInfo = JSON.parse(doctorAuthInfo);
+                
                 dispatch(doctorAuthActions.login(convertedObjectInfo));
                 return;
             }
@@ -48,12 +50,14 @@ const IndexComponent: FC<{navigation:NavigationProp<any>}> = ({navigation})=> {
 
     const fetchAllData = useCallback( async (): Promise<any>=> {
         try{
-            const data = await utils.sendRequest("GET", `${utils.BACKEND_URL}/shared/all-data?field=appointments`,{},{'Authorization': `BEARER ${doctorAuthReducer.authToken}`});
+            const data = await utils.sendRequest("GET", `${utils.BACKEND_URL}/shared/all-data?field=defaultAppointmentsMedicalFilesDoctors`,{},{'Authorization': `BEARER ${doctorAuthReducer.authToken}`});
             const response: ResponseType = await data.json();
             if(response.statusCode != 200) {
                 errorHandler(response.message, response.statusCode);
             }
+            
             dispatch(appointmentsActions.addAllAppointments(response.appointments));
+            dispatch(medicalFilesActions.addAllMedicalFiles(response.medicalFiles));
         }catch(err:any) {
             utils.showAlertMessage("ERROR 😔", err.message)
         }
@@ -85,7 +89,7 @@ const IndexComponent: FC<{navigation:NavigationProp<any>}> = ({navigation})=> {
             </Animated.View>
             <Text style={styles.circleText}>APPOINTMENTS</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={{marginBottom:'10%'}} onPress={()=>{}}>
+        <TouchableOpacity style={{marginBottom:'10%'}} onPress={()=>navigation.navigate('medical-files')}>
             <Animated.View entering={FadeInRight.duration(700)}>
                 <View style={styles.circleContainer}>
                     <Folder height={30} width={30}/>
@@ -93,14 +97,6 @@ const IndexComponent: FC<{navigation:NavigationProp<any>}> = ({navigation})=> {
                 <Text style={styles.circleText}>MEDICAL FILES</Text>
             </Animated.View>
         </TouchableOpacity>
-        {/* <TouchableOpacity onPress={()=>navigation.navigate('e-pharmacy')}>
-            <Animated.View entering={SlideInLeft.duration(700)}>
-                <View style={{...styles.circleContainer, width:'65%'}}>
-                    <Epharmacy height={30} width={30}/>
-                </View>
-                <Text style={styles.circleText}>E-PHARMACY</Text>
-            </Animated.View>
-        </TouchableOpacity> */}
         <TouchableOpacity onPress={()=>navigation.navigate('emergency')}>
             <Animated.View entering={SlideInRight.duration(700)}>
                 <View style={{...styles.circleContainer, backgroundColor:'red', width:'70%'}}>
@@ -108,6 +104,14 @@ const IndexComponent: FC<{navigation:NavigationProp<any>}> = ({navigation})=> {
                 </View>
                 <Text style={styles.circleText}>EMERGENCY</Text>
             </Animated.View>
+        </TouchableOpacity>
+        <TouchableOpacity style={{width:'100%', display:'flex', alignItems:'flex-end'}} onPress={()=>navigation.navigate('my-info')}>
+        <Animated.View entering={SlideInUp.duration(700)}>
+            <View style={styles.settingsContainer}>
+                <Feather name="settings" size={30} color={colors.thirdColor} />
+                <Text style={{color:colors.thirdColor}}>MY INFO</Text>
+            </View>
+        </Animated.View>
         </TouchableOpacity>
     </CardIconsContainer>
 </FixedContainer>
@@ -147,12 +151,12 @@ const styles = StyleSheet.create({
     },
     settingsContainer: {
         backgroundColor:colors.mainColor,
-        width:'24.5%',
+        width:'25.5%',
         display:'flex',
         justifyContent: 'center',
         alignItems:'center',
         marginRight: '5%',
-        marginVertical: utils.deviceHeight <= 667 ? Platform.OS == 'ios' ? '17.5%' : '10%'  : Platform.OS == 'ios' ? '30%' : '30%',
+        marginTop: utils.deviceHeight <= 667 ? Platform.OS == 'ios' ? '39%' : '33%'  : Platform.OS == 'ios' ? '50%' : '50%',
         padding:15,
         borderTopRightRadius: 35,
         borderTopLeftRadius: 35,

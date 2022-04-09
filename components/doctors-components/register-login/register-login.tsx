@@ -25,6 +25,7 @@ import constantValues from '../../../helper/constantValues.json';
 import generalActions from "../../../store/actions/general-actions";
 import Spinner from "../../shared/spinner";
 import { StackActions } from "@react-navigation/native";
+import * as Notifications from 'expo-notifications';
 
 const RegisterLoginPage: FC<NavigationType> = ({navigation}) => {
     const dispatch = useDispatch();
@@ -85,6 +86,10 @@ const RegisterLoginPage: FC<NavigationType> = ({navigation}) => {
     const autoFocusField5 = useRef<any>();
     const autoFocusField6 = useRef<any>();
 
+    const getPushTokenNotification = async () => {
+        const pushToken = await Notifications.getExpoPushTokenAsync();
+        return pushToken.data
+      }
 
     const onChangeHandler = (value: string, name: string, codeIndex?: number, isLogin?: boolean): void => {
         switch(name) {
@@ -160,6 +165,8 @@ const RegisterLoginPage: FC<NavigationType> = ({navigation}) => {
             setSteps(4);
             setLastStep(3);
         }catch(err: any) {
+            Keyboard.dismiss()
+            setRsponseHandler(err);
             dispatch(generalActions.endSend());
             responseBottomSheet.current?.snapToIndex(1);
             return;
@@ -169,6 +176,7 @@ const RegisterLoginPage: FC<NavigationType> = ({navigation}) => {
     
     const verifyCodeAndRegister = async(codeNum:string): Promise<any> => {
         dispatch(generalActions.endSend())
+        const pushToken = await getPushTokenNotification()
         const form = new FormData();
         form.append("doctorPhone", formValue.doctorPhone.value.trimEnd())
         form.append("doctorFullName", formValue.doctorFullName.value.trimEnd())
@@ -178,6 +186,7 @@ const RegisterLoginPage: FC<NavigationType> = ({navigation}) => {
         form.append("doctorClinic", formValue.doctorClinic.trimEnd())
         form.append("doctorCertificate",  formValue.doctorCertificate.value)
         form.append("doctorPhoto", formValue.doctorPhoto.value);
+        form.append("pushToken", pushToken);
         form.append("code", codeNum)
         try{
             const data = await utils.sendRequest("POSTFILE",`${utils.BACKEND_URL}/doctors/register`, form);
@@ -196,6 +205,7 @@ const RegisterLoginPage: FC<NavigationType> = ({navigation}) => {
             }, 1200)
             
         }catch(err:any){
+            Keyboard.dismiss()
             setRsponseHandler(err);
             responseBottomSheet.current?.snapToIndex(1);
             return;
@@ -214,6 +224,7 @@ const RegisterLoginPage: FC<NavigationType> = ({navigation}) => {
             setSteps(4);
             setLastStep(0);
         }catch(err: any) {
+            Keyboard.dismiss()
             dispatch(generalActions.endSend());
             setRsponseHandler(err);
             responseBottomSheet.current?.snapToIndex(1);
@@ -222,9 +233,10 @@ const RegisterLoginPage: FC<NavigationType> = ({navigation}) => {
     }
 
     const verifyCodeAndLogin = async(codeNum:string): Promise<any> => {
+        dispatch(generalActions.endSend());
         try{
-            dispatch(generalActions.endSend());
-            const data = await utils.sendRequest("POST", `${utils.BACKEND_URL}/doctors/login`,{doctorPhone: formValue.doctorPhone.value.trimEnd() ,code: codeNum});
+            const pushToken = await getPushTokenNotification();
+            const data = await utils.sendRequest("POST", `${utils.BACKEND_URL}/doctors/login`,{doctorPhone: formValue.doctorPhone.value.trimEnd() ,code: codeNum, pushToken});
             const response: ResponseType = await data.json();
             if(response.statusCode != 200) {
                 errorHandler(response.message, response.statusCode, response.validations);
@@ -234,8 +246,10 @@ const RegisterLoginPage: FC<NavigationType> = ({navigation}) => {
                 errorHandler(response.message, response.statusCode, response.validations);
             }
             
+            console.log(response.doctor);
             await AsyncStorage.setItem("doctor-auth", JSON.stringify(response.doctor));
-            dispatch(patientAuthActions.register(response.doctor));
+            
+            dispatch(patientAuthActions.login(response.doctor));
             setRsponseHandler(response);
             responseBottomSheet.current?.snapToIndex(1);
             

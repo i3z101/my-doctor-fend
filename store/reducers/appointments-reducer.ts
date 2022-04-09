@@ -1,7 +1,7 @@
 import { Reducer } from "react";
 import { AnyAction } from "redux";
 import { AppointmentsReducer } from "../../helper/types";
-import { ADD_ALL_APPOINTMENTS, ADD_ALL_DOCTORS, ADD_APPOINTMENT, CANCEL_APPOINTMENT, UPDATE_APPOINTMENT_DATE_TIME } from "../actions/appointments-actions";
+import { ADD_ALL_APPOINTMENTS, ADD_ALL_DOCTORS, ADD_APPOINTMENT, CANCEL_APPOINTMENT, CLEAR_APPOINTMENTS_DOCTORS, UPDATE_APPOINTMENT_DATE_TIME } from "../actions/appointments-actions";
 
 
 const initState: AppointmentsReducer = {
@@ -62,6 +62,11 @@ const appointmentsReducer: Reducer<AppointmentsReducer, AnyAction> = (state= ini
             return {
                 ...state,
                 doctors: action.doctors
+            }
+        case CLEAR_APPOINTMENTS_DOCTORS:
+            return {
+                appointments: [],
+                doctors: []
             }
         default:
             return state

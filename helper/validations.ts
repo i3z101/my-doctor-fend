@@ -4,7 +4,7 @@ export const validateStringOnChange = (value: string, name: string, setState: (p
         if(value.trim() == ""){
             message = `${name} required`;
         }else if(containSpace && containNumeric && containSymbolsCharacters) {
-            if(!value.trim().match(`([^*&^%$#@!~+-=?؟])([A-Za-z\s0-9${symbol}])+$`)){
+            if(!value.trim().match(`(^[^*&^%$#@!~+-=?؟])([A-Za-z\s0-9${symbol}])+$`)){
                 message = `${name} should contain english characters or numbers or ${symbol}`;
             }else if(value.length < min || value.length > max){
                 message = `${name} should be between ${min} and ${max}`;
@@ -12,15 +12,15 @@ export const validateStringOnChange = (value: string, name: string, setState: (p
                 message = "";
             }
         }else if(containSpace && !containNumeric && containSymbolsCharacters) {
-            if(!value.trim().match(`([^5*&^%$#@!~+-=?؟])[A-Za-z\s${symbol}]+$`)){
-                message = `${name} should contain english character with ${symbol}`;
+            if(!value.trim().match(`^[^*&^%$#@!~+-=?؟][A-Za-z\s ${symbol}]+$`)){
+                message = `${name} should contain english character with ${symbol} as a sperator`;
             }else if(value.length < min || value.length > max){
                 message = `${name} should be between ${min} and ${max}`;
             }else {
                 message = "";
             }
         }else if(containSpace && !containNumeric && !containSymbolsCharacters){
-            if(!value.trim().match(`[A-Za-z\s]+$`)){
+            if(!value.trim().match(/^[A-Za-z\s]+$/)){
                 message = `${name} should contain only english character`;
             }else if(value.length < min || value.length > max){
                 message = `${name} should be between ${min} and ${max}`;
@@ -28,7 +28,7 @@ export const validateStringOnChange = (value: string, name: string, setState: (p
                 message = "";
             }    
         }else if(containSpace && containNumeric && !containSymbolsCharacters) {
-            if(!value.trim().match(`[A-Za-z\s0-9]+$`)){
+            if(!value.trim().match(/^[A-Za-z\s0-9]+$/)){
                 message = `${name} should contain english character or numbers`;
             }else if(value.length < min || value.length > max){
                 message = `${name} should be between ${min} and ${max}`;
@@ -56,7 +56,7 @@ export const validateStringOnChange = (value: string, name: string, setState: (p
         if(value.trim() == "") {
             message = ""
         }else if(containSpace && containNumeric && containSymbolsCharacters) {        
-            if(!value.match(`[A-Za-z\s0-9${symbol}]+$`)){
+            if(!value.trim().match(`(^[^*&^%$#@!~+-=?؟])([A-Za-z\s0-9${symbol}])+$`)){
                 message = `${name} should contain english characters or numbers or ${symbol}`;
             }else if(value.length < min || value.length > max){
                 message = `${name} should be between ${min} and ${max}`;
@@ -64,7 +64,7 @@ export const validateStringOnChange = (value: string, name: string, setState: (p
                 message = "";
             }
         }else if(containSpace && !containNumeric && containSymbolsCharacters) {
-            if(!value.match(`[A-Za-z\s${symbol}]+$`)){
+            if(!value.trim().match(`^[^*&^%$#@!~+-=?؟][A-Za-z\s${symbol}]+$`)){
                 message = `${name} should contain english character or ${symbol}`;
             }else if(value.length < min || value.length > max){
                 message = `${name} should be between ${min} and ${max}`;

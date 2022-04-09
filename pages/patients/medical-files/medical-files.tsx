@@ -8,12 +8,6 @@ const MedicalFiles: FC<NavigationType> = ({navigation}) => {
     return <MedicalFilesPage navigation={navigation} />
 }
 
-const styles = StyleSheet.create({
-    container: {
-        display:'flex',
-        justifyContent:'center',
-        alignItems: 'center'
-    }
-})
+
 
 export default MedicalFiles;

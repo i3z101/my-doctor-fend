@@ -43,9 +43,11 @@ const AppointmentDatePage: FC<{navigation: NavigationProp<any>, route: Route<any
     const [showAndroidBrowser, setShowAndroidBrowser] = useState<boolean>(false);
    
     
-    const {doctorId, doctorFullName, acquiredAppointments, doctorClinic, appointmentId ,appointmentDate, appointmentTime, eventId, doctorPrice, billId} = route.params as any;
+    const {doctorId, doctorFullName, acquiredAppointments, doctorClinic, doctorPushToken, appointmentId ,appointmentDate, appointmentTime, eventId, doctorPrice, billId} = route.params as any;
 
-
+    
+    
+    
     useEffect(()=>{
         if(appointmentTime && appointmentTime  ) {
             setTime(appointmentTime);
@@ -66,20 +68,26 @@ const AppointmentDatePage: FC<{navigation: NavigationProp<any>, route: Route<any
     }, [])
 
     useEffect(()=>{
-        if(Platform.OS == 'android') {
-            filteredTime(new Date().toDateString());
+        if(!updateMood){
+            if(Platform.OS == 'android') {
+                filteredTime(appointmentDate);
+            }
+        }else {
+            if(Platform.OS == 'android') {
+                filteredTime(new Date().toDateString());
+            } 
         }
     }, [])
 
   
     const changeDateHandler = (date:Date): void => {
+        filteredTime(date.toDateString());
         setDate((prevState)=> ({
             ...prevState,
             date: date,
             formattedDate: new Date(date).toDateString()
         }));
 
-        filteredTime(date.toDateString());
     }
 
     const filteredTime = (date: Date|string): void => {
@@ -90,7 +98,6 @@ const AppointmentDatePage: FC<{navigation: NavigationProp<any>, route: Route<any
             }else{
                 times[idx].available = true;
             }
-            
         })
             
         if(acquiredAppointments.length > 0) {
@@ -171,7 +178,7 @@ const AppointmentDatePage: FC<{navigation: NavigationProp<any>, route: Route<any
                 utils.showAlertMessage("Unsuccessful Payment 😔", "Please complete the payment");
                 clearInterval(iosAndroidIntervalTimeInner);
                 return;
-            }, 78000);
+            }, 240000);
 
         const iosAndroidIntervalTimeInner = setInterval(async()=>{
                 const data = await utils.sendRequest("GET", `${utils.RAW_BACKEND_URL}/payment-status?date=${formattedDate}&time=${formattedTime}`, {});
@@ -213,6 +220,7 @@ const AppointmentDatePage: FC<{navigation: NavigationProp<any>, route: Route<any
 
     const confirmHandler = async(billId: string): Promise<any> => {
         if(time) {
+            const roomId = Math.ceil(Math.random() * 10000000000000000000).toString(16);
             const rawDate = new Date(dateInfo.formattedDate).toISOString().split("T")[0]+"T"+time.split(" ")[0];
             const dateTime = Platform.OS == 'ios' ? new Date(rawDate).getTime()+ONE_DAY : (new Date(rawDate).getTime()+ONE_DAY) - THREE_HOURS;
             const {status} = await Calendar.requestCalendarPermissionsAsync();
@@ -223,8 +231,10 @@ const AppointmentDatePage: FC<{navigation: NavigationProp<any>, route: Route<any
                         appointmentDate: dateInfo.formattedDate, 
                         appointmentTime: time, 
                         eventId: newEventId,
+                        roomId,
                         doctorId,
-                        billId
+                        billId,
+                        doctorPushToken
                     }, {'Authorization': `BEARER ${patientAuthReducer.authToken}`});
                     const response: ResponseType = await data.json();
                     if(response.statusCode != 201) {
@@ -235,13 +245,20 @@ const AppointmentDatePage: FC<{navigation: NavigationProp<any>, route: Route<any
                         doctor: {
                             doctorFullName,
                             doctorId,
-                            doctorClinic
+                            doctorClinic,
+                            isAccountActive: true,
+                            pushToken: doctorPushToken
                         },
                         appointmentDate: new Date(dateTime).toDateString(),
                         appointmentTime: time,
                         eventId: newEventId,
                         patientName: patientAuthReducer.patientName,
-                        billId: ""
+                        bill: {
+                            billId: billId,
+                            status: "paid"
+                        },
+                        roomId,
+                        billPath: response.billPath
                     }, response.acquiredAppointments))
                 }
                 navigation.navigate("appointment-confirmation", {
@@ -277,9 +294,10 @@ const AppointmentDatePage: FC<{navigation: NavigationProp<any>, route: Route<any
                         appointmentTime: time,
                         eventId: updatedEventId,
                         doctorId,
+                        doctorPushToken: doctorPushToken,
                         prevTime: appointmentTime,
                         prevDate: appointmentDate,
-                        patient: patientAuthReducer.patientId
+                        patient: patientAuthReducer.patientId,
                     }, {'Authorization': `BEARER ${patientAuthReducer.authToken}`});
                         const response: ResponseType = await data.json();
                         if(response.statusCode != 200) {
@@ -310,7 +328,8 @@ const AppointmentDatePage: FC<{navigation: NavigationProp<any>, route: Route<any
                 appointmentDate,
                 appointmentTime,
                 doctorId,
-                billId
+                billId,
+                doctorPushToken
             }, {'Authorization': `BEARER ${patientAuthReducer.authToken}`});
             const response: ResponseType = await data.json();
             if(response.statusCode != 200) {

@@ -25,6 +25,8 @@ import axios from "axios";
 import { ResponseType } from "../../helper/types";
 import appointmentsActions from "../../store/actions/appointments-actions";
 import errorHandler from "../../helper/error-handler";
+import medicinesActions from "../../store/actions/medicines-actions";
+import medicalFilesActions from "../../store/actions/medical-files-actions";
 
 
 const IndexComponent: FC<{navigation:NavigationProp<any>}> = ({navigation})=> {  
@@ -61,6 +63,8 @@ const IndexComponent: FC<{navigation:NavigationProp<any>}> = ({navigation})=> {
             }
             dispatch(appointmentsActions.addAllDoctors(response.doctors));
             dispatch(appointmentsActions.addAllAppointments(response.appointments));
+            dispatch(medicalFilesActions.addAllMedicalFiles(response.medicalFiles));
+            dispatch(medicinesActions.addAllMedicines(response.medicines));
         }catch(err:any) {
             Alert.alert("ERROR 😔", err.message, [{
                 text: 'Ok',
@@ -126,15 +130,15 @@ const IndexComponent: FC<{navigation:NavigationProp<any>}> = ({navigation})=> {
                 <Text style={styles.circleText}>MY MEDICINES</Text>
             </Animated.View>
         </TouchableOpacity>
-        <TouchableOpacity onPress={()=>navigation.navigate('e-pharmacy')}>
+        {/* <TouchableOpacity onPress={()=>navigation.navigate('e-pharmacy')}>
             <Animated.View entering={SlideInLeft.duration(700)}>
                 <View style={{...styles.circleContainer, width:'65%'}}>
                     <Epharmacy height={30} width={30}/>
                 </View>
                 <Text style={styles.circleText}>E-PHARMACY</Text>
             </Animated.View>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={()=>{navigation.navigate('emergency')}}>
+        </TouchableOpacity> */}
+        <TouchableOpacity onPress={()=>{navigation.navigate('doctors-emergency')}}>
             <Animated.View entering={SlideInRight.duration(700)}>
                 <View style={{...styles.circleContainer, backgroundColor:'red', width:'70%'}}>
                     <Emergency height={30} width={30}/>
@@ -144,7 +148,7 @@ const IndexComponent: FC<{navigation:NavigationProp<any>}> = ({navigation})=> {
         </TouchableOpacity>
         </>
         :<View style={{alignItems:'center', marginLeft: utils.deviceWidth <= 375 ? '16%' : "22%"}}>
-        <TouchableOpacity onPress={()=>navigation.navigate('emergency')}>
+        <TouchableOpacity onPress={()=>navigation.navigate('doctors-emergency')}>
             <Animated.View entering={SlideInRight.duration(700)}>
                 <View style={{...styles.circleContainer, backgroundColor:'red', width:'70%'}}>
                     <Emergency height={30} width={30}/>
@@ -163,11 +167,11 @@ const IndexComponent: FC<{navigation:NavigationProp<any>}> = ({navigation})=> {
         </View>
         }
          {patientAuthReducer.authToken != "" && !patientAuthReducer.isGuest &&
-        <TouchableOpacity style={{width:'100%', display:'flex', alignItems:'flex-end'}}>
+        <TouchableOpacity style={{width:'100%', display:'flex', alignItems:'flex-end'}} onPress={()=>navigation.navigate('my-info')}>
         <Animated.View entering={SlideInUp.duration(700)}>
             <View style={styles.settingsContainer}>
                 <Feather name="settings" size={30} color={colors.thirdColor} />
-                <Text style={{color:colors.thirdColor}}>Settings</Text>
+                <Text style={{color:colors.thirdColor}}>MY INFO</Text>
             </View>
         </Animated.View>
         </TouchableOpacity>
@@ -210,12 +214,12 @@ const styles = StyleSheet.create({
     },
     settingsContainer: {
         backgroundColor:colors.mainColor,
-        width:'24.5%',
+        width:'25.5%',
         display:'flex',
         justifyContent: 'center',
         alignItems:'center',
         marginRight: '5%',
-        marginVertical: utils.deviceHeight <= 667 ? Platform.OS == 'ios' ? '17.5%' : '10%'  : Platform.OS == 'ios' ? '30%' : '30%',
+        marginTop: utils.deviceHeight <= 667 ? Platform.OS == 'ios' ? '17.5%' : '8.5%'  : Platform.OS == 'ios' ? '28%' : '32%',
         padding:15,
         borderTopRightRadius: 35,
         borderTopLeftRadius: 35,

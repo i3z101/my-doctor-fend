@@ -1,10 +1,10 @@
 import React, { FC } from "react";
 import EmergencyPage from "../../../components/patients-components/emergency/emergency";
-import { NavigationType } from "../../../helper/types";
+import {NavigationWithRoute } from "../../../helper/types";
 
 
-const Emergency: FC<NavigationType> = ({navigation}) => {
-    return <EmergencyPage navigation={navigation} />
+const Emergency: FC<NavigationWithRoute> = ({navigation, route}) => {
+    return <EmergencyPage navigation={navigation} route={route} />
 }
 
 

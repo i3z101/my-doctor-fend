@@ -25,10 +25,11 @@ const AppointmentDoctorsListItems: FC<{item: DoctorType, navigation: NavigationP
             doctorFullName: item.doctorFullName,
             acquiredAppointments: item.acquiredAppointments,
             doctorClinic: item.doctorClinic,
-            doctorPrice: item.doctorPrice,
+            doctorPrice: item.doctorPricePerHour,
+            doctorPushToken: item.pushToken
         })}>
             <Text style={{color:colors.thirdColor}}>Book</Text>
-            <Text style={{color: colors.thirdColor, fontWeight:'700'}}>{item.doctorPrice}$/hr</Text>
+            <Text style={{color: colors.thirdColor, fontWeight:'700'}}>{item.doctorPricePerHour}$/hr</Text>
         </TouchableOpacity>
     </View>
 }

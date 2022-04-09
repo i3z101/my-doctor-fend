@@ -1,6 +1,6 @@
 import { Reducer } from "react";
 import { MedicinesReducer } from "../../helper/types";
-import { ADD_ALL_MEDICINES, ADD_MEDICINE, UPDATE_MEDICINE } from "../actions/medicines-actions";
+import { ADD_ALL_MEDICINES, ADD_MEDICINE, CLEAR_MEDICINES, UPDATE_MEDICINE } from "../actions/medicines-actions";
 
 const initState: MedicinesReducer = {
     medicines: []
@@ -27,6 +27,10 @@ const medicinesReducer: Reducer<MedicinesReducer, any> = (state= initState, acti
             return {
                 ...state,
                 medicines: medicineUpdatedCopy
+            }
+        case CLEAR_MEDICINES:
+            return {
+                medicines: []
             }
         default:
             return state

@@ -129,6 +129,7 @@ const RegisterLoginPage: FC<NavigationType> = ({navigation}) => {
             setSteps(4);
             setLastStep(3);
         }catch(err: any) {
+            Keyboard.dismiss()
             dispatch(generalActions.endSend());
             setRsponseHandler(err);
             responseBottomSheet.current?.snapToIndex(1);
@@ -155,6 +156,7 @@ const RegisterLoginPage: FC<NavigationType> = ({navigation}) => {
             }, 1200)
             
         }catch(err:any){
+            Keyboard.dismiss()
             setRsponseHandler(err);
             responseBottomSheet.current?.snapToIndex(1);
             return;
@@ -164,7 +166,7 @@ const RegisterLoginPage: FC<NavigationType> = ({navigation}) => {
     const submitHandlerLogin = async(): Promise<any> => {
         try {
             dispatch(generalActions.startSend());
-            const data = await utils.sendRequest("POST", `${utils.BACKEND_URL}/patients/send-sms-code-login`, {patientPhone: formValue.patientPhone.value});
+            const data = await utils.sendRequest("POST", `${utils.BACKEND_URL}/patients/send-sms-code-login`, {patientPhone: formValue.patientPhone.value.trim()});
             const response: ResponseType = await data.json();
             if(response.statusCode != 200) {
                 errorHandler(response.message, response.statusCode, response.validations);
@@ -173,6 +175,7 @@ const RegisterLoginPage: FC<NavigationType> = ({navigation}) => {
             setSteps(4);
             setLastStep(0);
         }catch(err: any) {
+            Keyboard.dismiss()
             dispatch(generalActions.endSend());
             setRsponseHandler(err);
             responseBottomSheet.current?.snapToIndex(1);
@@ -248,7 +251,7 @@ const RegisterLoginPage: FC<NavigationType> = ({navigation}) => {
         }
         {steps == 0 || steps == 1 ?
             <Animated.View entering={SlideInRight.duration(700)} exiting={SlideOutRight.duration(100)}>
-                <UnderlinedTextInput placeholder="*Patient phone without +" validationText={formValue.patientPhone.validation}
+                <UnderlinedTextInput placeholder="*Patient phone with country code without +" validationText={formValue.patientPhone.validation}
                     attributes={{ value:formValue.patientPhone.value, onChangeText:(value)=>onChangeHandler(value, "patientPhone"),
                     returnKeyType:"default", maxLength:12, keyboardType:'phone-pad', enablesReturnKeyAutomatically:true}} />
             </Animated.View>

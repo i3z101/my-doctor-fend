@@ -12,6 +12,7 @@ import colors from "../../../assets/colors";
 import CenteredText from "../../shared/centered-text";
 import AddNewIconBtn from "../reuseable/add-new-icon-btn";
 import utils from "../../../helper/utils"; 
+import MedicalFileCard from "../../shared/medical-file-card";
 
 const MedicalFilesPage: FC<{navigation: NavigationProp<any>}> = ({navigation}) => {
     const medicalFileReducer = useSelector((state:any)=> state.medicalFiles);
@@ -23,35 +24,7 @@ const MedicalFilesPage: FC<{navigation: NavigationProp<any>}> = ({navigation}) =
                     medicalFile: null
                 })} />
                 {medicalFileReducer.medicalFiles.length > 0 ?
-                <FlatList
-                    style={{height: utils.deviceHeight <= 667 ? 300 : Platform.OS == 'ios' ? 400 : 500}}
-                    data={medicalFileReducer.medicalFiles}
-                    keyExtractor={(item)=>item.fileName}
-                    renderItem= {({item})=> {
-                        return <View style={styles.cardOuterContainer}>
-                            <View style={{...styles.rowStyle, marginBottom:5}}>
-                                <Text style={styles.fileNameTextStyle}>File Name: {item.fileName}</Text>
-                                <TouchableOpacity onPress={()=>navigation.navigate('add-medical-file', {
-                                    medicalFile: item
-                                })}>
-                                    <Text style={styles.fileNameTextStyle}>Manage</Text>
-                                </TouchableOpacity>
-                            </View>
-                            <View style={{borderWidth:2, borderColor: colors.mainColor, borderRadius:7}}>
-                                <View style={{padding:7}}>
-                                    <View style={{...styles.rowStyle, ...styles.space}}>
-                                        <Text>Disease: {item.disease}</Text>
-                                        <Text>Dr: {item.doctor.doctorName}</Text>
-                                    </View>
-                                    <View style={styles.rowStyle}>
-                                        <Text>Patient: {item.patient}</Text>
-                                        <Text>Medicine: {item.medicine}</Text>
-                                    </View>
-                                </View>
-                            </View>
-                        </View>
-                    }}
-                />
+                    <MedicalFileCard navigation={navigation}/>
                 : <CenteredText text="You don't have a medical file yet. Create one!" />
                 }
             </View>

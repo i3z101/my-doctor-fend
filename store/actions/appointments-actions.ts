@@ -6,6 +6,7 @@ export const ADD_APPOINTMENT: string = "ADD_APPOINTMENT";
 export const UPDATE_APPOINTMENT_DATE_TIME = "UPDATE_APPOINTMENT_DATE_TIME";
 export const CANCEL_APPOINTMENT = "CANCEL_APPOINTMENT";
 export const ADD_ALL_DOCTORS = "ADD_ALL_DOCTORS";
+export const CLEAR_APPOINTMENTS_DOCTORS = "CLEAR_APPOINTMENTS_DOCTORS";
 
 export default {
     addAllAppointments: (appointments: AppointmentType[]): AnyAction => {
@@ -44,6 +45,11 @@ export default {
         return {
             type: ADD_ALL_DOCTORS,
             doctors
+        }
+    },
+    clearAppointmentsAndDoctors: (): AnyAction => {
+        return {
+            type: CLEAR_APPOINTMENTS_DOCTORS
         }
     }
 }

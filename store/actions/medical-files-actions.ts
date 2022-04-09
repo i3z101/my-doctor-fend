@@ -1,8 +1,10 @@
+import { AnyAction } from "redux";
 import { MedicalFileReducerType, MedicalFileType } from "../../helper/types";
 
 export const ADD_ALL_MEDICAL_FILES = "ADD_ALL_MEDIICAL_FILES";
 export const ADD_MEDICAL_FILE = "ADD_MEDICAL_FILE";
 export const UPDATE_MEDICAL_FILE = "UPDATE_MEDICAL_FILE";
+export const CLEAR_MEDICAL_FILES = "CLEAR_MEDICAL_FILES";
 
 export default {
     addAllMedicalFiles: (medicalFiles: MedicalFileReducerType[]) => {
@@ -21,6 +23,11 @@ export default {
         return {
             type: UPDATE_MEDICAL_FILE,
             updatedMedicalFile
+        }
+    },
+    clearMedicalFiles: (): AnyAction => {
+        return {
+            type: CLEAR_MEDICAL_FILES
         }
     }
 }

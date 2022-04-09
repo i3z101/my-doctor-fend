@@ -16,7 +16,8 @@ const initState: DoctorAuthType = {
     doctorGraduatedFrom: "",
     acquiredAppointments: [],
     isAccountActive: true,
-    updatePermitted: ""
+    updatePermitted: "",
+    pushToken: ""
 } 
 
 const doctorAuthReducer: Reducer<DoctorAuthType, AnyAction> = (state= initState, action): DoctorAuthType => {
@@ -45,7 +46,8 @@ const doctorAuthReducer: Reducer<DoctorAuthType, AnyAction> = (state= initState,
                 doctorGraduatedFrom: "",
                 acquiredAppointments: [],
                 isAccountActive: true,
-                updatePermitted: ""
+                updatePermitted: "",
+                pushToken: ""
             }
         default:
             return state;

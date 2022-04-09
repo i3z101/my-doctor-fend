@@ -50,12 +50,13 @@ const DoctorAppointmentsPage: FC<{navigation: NavigationProp<any>}> = ({navigati
         <ImageMenu hasBackElement navigation={navigation} Image={VideoCall} />
         <CardIconsContainer containerStyle={{...styles.cardContainer, alignItems:'center'}}>
             <View style={{width:'100%'}}>
-            {appointmentsReducer.appointments.length > 0 ?
-                !refreshing ?
+            {!refreshing ?
+                <>
+                <TouchableOpacity style={styles.addBtn}>
+                    <EvilIcons name="refresh" size={42} color="black" onPress={()=>refreshAppointments()} />
+                </TouchableOpacity>
+                {appointmentsReducer.appointments.length > 0 ?
                     <Fragment>
-                        <TouchableOpacity style={styles.addBtn}>
-                            <EvilIcons name="refresh" size={42} color="black" onPress={()=>refreshAppointments()} />
-                        </TouchableOpacity>
                         {nextCalls.length > 0 ?
                         <View style={{...styles.listsContainer, marginTop:'-1%'}}>
                             <CallDoctorCard data={nextCalls} title="Upcoming call" hasBtns navigation={navigation} doctor={true}/>
@@ -65,15 +66,17 @@ const DoctorAppointmentsPage: FC<{navigation: NavigationProp<any>}> = ({navigati
                     <View style={{height:20, width:'90%', borderBottomWidth:2 ,borderBottomColor: colors.secondColor}}></View>
                         {previousCalls.length > 0 ?
                         <View style={{...styles.listsContainer, marginTop:'1%'}}>
-                            <CallDoctorCard data={previousCalls} title="Previous call" navigation={navigation} />
+                            <CallDoctorCard data={previousCalls} title="Previous call" navigation={navigation} doctor={true}/>
                             </View>
                         : <Text>No previous calls</Text>
                         }
                     </Fragment>
+                    :<CenteredText text="No appointments yet"/>
+                }
+                </>
                 : <View>
                     <Spinner size={40} color={colors.mainColor}/>
                 </View>
-                :<CenteredText text="No appointments yet"/>
             }
             </View>
         </CardIconsContainer>
