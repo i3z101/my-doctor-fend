@@ -71,7 +71,7 @@ const DoctorEmergencyListPage: FC<NavigationType> = ({navigation}) => {
                     ListEmptyComponent = {<EmptyListMessage message="No available doctors" />}
                     renderItem = {({item}) => {
                         return <TouchableOpacity style={styles.container} onPress={()=>callUser(item.roomId, item.pushToken)}>
-                            <Text style={styles.text}>Dr.{item.doctorFullName} is available</Text>
+                            <Text style={styles.text}>Dr.{item.doctorFullName} is available click to join</Text>
                             <AntDesign name="right" size={24} color="black" />
                         </TouchableOpacity>
                     }}

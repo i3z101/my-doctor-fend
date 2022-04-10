@@ -7,7 +7,7 @@ import utils from "../../../helper/utils";
 
 
 const BorderedButton: FC<BorderedBtnType> = ({btnText, onPress, btnContainerStyle, btnTextStyle, btnAttribute, children}) => {
-    return <TouchableOpacity {...btnAttribute} style={{...styles.btnContainer,...btnContainerStyle}} onPress={onPress} disabled={children ? true : false}>
+    return <TouchableOpacity {...btnAttribute}  style={{...styles.btnContainer,...btnContainerStyle}} onPress={onPress} >
         {children ?
         children:
         <Text style={{...styles.btnText, ...btnTextStyle}}>{btnText}</Text>

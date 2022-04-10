@@ -224,53 +224,62 @@ const AppointmentDatePage: FC<{navigation: NavigationProp<any>, route: Route<any
             const rawDate = new Date(dateInfo.formattedDate).toISOString().split("T")[0]+"T"+time.split(" ")[0];
             const dateTime = Platform.OS == 'ios' ? new Date(rawDate).getTime()+ONE_DAY : (new Date(rawDate).getTime()+ONE_DAY) - THREE_HOURS;
             const {status} = await Calendar.requestCalendarPermissionsAsync();
+            let newEventId: string | number = "";
             try{ 
                 if(status == "granted") {
-                    const newEventId = await createCalendarEvent(dateTime);
-                    const data = await utils.sendRequest("POST", `${utils.BACKEND_URL}/patients/appointments/add-new-appointment`, {
-                        appointmentDate: dateInfo.formattedDate, 
-                        appointmentTime: time, 
-                        eventId: newEventId,
-                        roomId,
-                        doctorId,
-                        billId,
-                        doctorPushToken
-                    }, {'Authorization': `BEARER ${patientAuthReducer.authToken}`});
-                    const response: ResponseType = await data.json();
-                    if(response.statusCode != 201) {
-                        errorHandler(response.message, response.statusCode, newEventId);
-                    }
-                    dispatch(appointmentsActions.addAppointment({
-                        appointmentId: response.appointmentId,
-                        doctor: {
-                            doctorFullName,
-                            doctorId,
-                            doctorClinic,
-                            isAccountActive: true,
-                            pushToken: doctorPushToken
-                        },
-                        appointmentDate: new Date(dateTime).toDateString(),
-                        appointmentTime: time,
-                        eventId: newEventId,
-                        patientName: patientAuthReducer.patientName,
-                        bill: {
-                            billId: billId,
-                            status: "paid"
-                        },
-                        roomId,
-                        billPath: response.billPath
-                    }, response.acquiredAppointments))
+                    newEventId = await createCalendarEvent(dateTime);
+                }else{
+                    utils.showAlertMessage("Warning", "You will not recieve a reminder for your appointments since you close the permissions", [
+                        {
+                            text: "Ok, I will handle that"
+                        }
+                    ])
                 }
-                navigation.navigate("appointment-confirmation", {
-                    date: dateInfo.formattedDate,
-                    time,
-                    doctorFullName,
-                    doctorClinic
-                })
-                dispatch(generalActions.endSend()) 
+                const data = await utils.sendRequest("POST", `${utils.BACKEND_URL}/patients/appointments/add-new-appointment`, {
+                    appointmentDate: dateInfo.formattedDate, 
+                    appointmentTime: time, 
+                    eventId: newEventId,
+                    roomId,
+                    doctorId,
+                    billId,
+                    doctorPushToken
+                }, {'Authorization': `BEARER ${patientAuthReducer.authToken}`});
+                const response: ResponseType = await data.json();
+                if(response.statusCode != 201) {
+                    errorHandler(response.message, response.statusCode, response.validations ?? [], newEventId);
+                }
+                dispatch(appointmentsActions.addAppointment({
+                    appointmentId: response.appointmentId,
+                    doctor: {
+                        doctorFullName,
+                        doctorId,
+                        doctorClinic,
+                        isAccountActive: true,
+                        pushToken: doctorPushToken
+                    },
+                    appointmentDate: new Date(dateTime).toDateString(),
+                    appointmentTime: time,
+                    eventId: newEventId,
+                    patientName: patientAuthReducer.patientName,
+                    bill: {
+                        billId: billId,
+                        status: "paid"
+                    },
+                    roomId,
+                    billPath: response.billPath
+                }, response.acquiredAppointments))
+            navigation.navigate("appointment-confirmation", {
+                date: dateInfo.formattedDate,
+                time,
+                doctorFullName,
+                doctorClinic
+            })
+            dispatch(generalActions.endSend()) 
             }catch(err:any) {
+                if(err.extraProps != "") {
+                    await Calendar.deleteCalendarAsync(err.extraProps);
+                }
                 dispatch(generalActions.endSend());
-                await Calendar.deleteCalendarAsync(err.validations);
                 utils.showAlertMessage("ERROR 😔", err.message);
             }
             
@@ -284,34 +293,37 @@ const AppointmentDatePage: FC<{navigation: NavigationProp<any>, route: Route<any
             const rawDate = new Date(dateInfo.formattedDate).toISOString().split("T")[0]+"T"+time.split(" ")[0];
             const dateTime = Platform.OS == 'ios' ? new Date(rawDate).getTime()+ONE_DAY : (new Date(rawDate).getTime()+ONE_DAY) - THREE_HOURS;
             const {status} = await Calendar.requestCalendarPermissionsAsync();
+            let updatedEventId: string | number = ""
             try{
                 if(status == "granted") {
-                       await Calendar.deleteCalendarAsync(eventId);
-                       const updatedEventId = await createCalendarEvent(dateTime);
-                       const data = await utils.sendRequest ("PATCH",`${utils.BACKEND_URL}/patients/appointments/update-appointment`, {
-                        appointmentId,
-                        appointmentDate: dateInfo.formattedDate,
-                        appointmentTime: time,
-                        eventId: updatedEventId,
-                        doctorId,
-                        doctorPushToken: doctorPushToken,
-                        prevTime: appointmentTime,
-                        prevDate: appointmentDate,
-                        patient: patientAuthReducer.patientId,
-                    }, {'Authorization': `BEARER ${patientAuthReducer.authToken}`});
-                        const response: ResponseType = await data.json();
-                        if(response.statusCode != 200) {
-                            errorHandler(response.message, response.statusCode, updatedEventId);
-                        }
-                        dispatch(appointmentsActions.updateAppointmentDateTime(appointmentId, dateInfo.formattedDate, time, response.acquiredAppointments, doctorId ,updatedEventId));
+                    if(eventId != "") {
+                        await Calendar.deleteCalendarAsync(eventId);
                     }
-                    navigation.navigate("appointment-confirmation", {
-                        date: dateInfo.formattedDate,
-                        time,
-                        doctorFullName,
-                        doctorClinic
-                    }) 
-                    dispatch(generalActions.endSend()) 
+                    updatedEventId = await createCalendarEvent(dateTime);
+                }
+                const data = await utils.sendRequest ("PATCH",`${utils.BACKEND_URL}/patients/appointments/update-appointment`, {
+                appointmentId,
+                appointmentDate: dateInfo.formattedDate,
+                appointmentTime: time,
+                eventId: updatedEventId,
+                doctorId,
+                doctorPushToken: doctorPushToken,
+                prevTime: appointmentTime,
+                prevDate: appointmentDate,
+                patient: patientAuthReducer.patientId,
+            }, {'Authorization': `BEARER ${patientAuthReducer.authToken}`});
+                const response: ResponseType = await data.json();
+                if(response.statusCode != 200) {
+                    errorHandler(response.message, response.statusCode,  response.validations ?? [] ,updatedEventId);
+                }
+                dispatch(appointmentsActions.updateAppointmentDateTime(appointmentId, dateInfo.formattedDate, time, response.acquiredAppointments, doctorId ,updatedEventId));
+            navigation.navigate("appointment-confirmation", {
+                date: dateInfo.formattedDate,
+                time,
+                doctorFullName,
+                doctorClinic
+            }) 
+            dispatch(generalActions.endSend()) 
             }catch(err: any) {
                 dispatch(generalActions.endSend()) 
                 await Calendar.deleteCalendarAsync(err.validations);
@@ -335,7 +347,9 @@ const AppointmentDatePage: FC<{navigation: NavigationProp<any>, route: Route<any
             if(response.statusCode != 200) {
                 errorHandler(response.message, response.statusCode);
             }
-            await Calendar.deleteCalendarAsync(eventId);
+            if(eventId != "") {
+                await Calendar.deleteCalendarAsync(eventId);
+            }
             dispatch(appointmentsActions.cancelAppointment(appointmentId, doctorId, response.acquiredAppointments));
             utils.showAlertMessage("Canceled 👍", `Your appointment with Dr.${doctorFullName} has been canceled`,
             [

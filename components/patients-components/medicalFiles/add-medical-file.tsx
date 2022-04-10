@@ -42,7 +42,7 @@ const AddMedicalFilePage: FC<{navigation: NavigationProp<any>, route: RouteProp<
             value: '',
             validation: ''
         },
-        clinic: '',
+        clinic: ' ',
         doctor: {
             doctorId: '',
             doctorFullName: ''
@@ -246,10 +246,11 @@ const AddMedicalFilePage: FC<{navigation: NavigationProp<any>, route: RouteProp<
                         children ={generalReducer.isSending ? <Spinner  /> : null}
                         btnText= {medicalFile != null ? "Update" : "Confirm"}
                         btnTextTwo="Cancel"
-                        btnLeftAttribute={{disabled: generalReducer.isSending ? true : medicalFileData.diseaseName.value.length < 1 || medicalFileData.diseaseName.validation.length > 0 || 
-                            medicalFileData.patientName.value.length < 1 || medicalFileData.patientName.validation.length > 0 ||
-                            medicalFileData.medicineName.value.length < 1 || medicalFileData.medicineName.validation.length > 0 ||
-                            medicalFileData.doctor.doctorFullName.length < 1 ? true : false}}
+                        btnLeftAttribute={{disabled: generalReducer.isSending ? true : medicalFileData.diseaseName.value == ""  || 
+                            medicalFileData.patientName.value == "" ||
+                            medicalFileData.medicineName.validation != "" ||
+                            medicalFileData.clinic == "" ||
+                            medicalFileData.doctor.doctorFullName == "" ? true : false}}
                         btnRightAttribute= {{disabled: generalReducer.isSending ? true : false}}
                         onPressOne={()=>medicalFile != null ? updateHandler() : submitHandler()}
                         onPressTwo={()=>navigation.goBack()}

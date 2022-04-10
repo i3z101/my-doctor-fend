@@ -159,7 +159,8 @@ export type PatientAuthType = {
     patientName: string,
     patientEmail?: string,
     updatePermitted: boolean,
-    isGuest: boolean
+    isGuest: boolean,
+    pushToken: string
 }
 
 export type DoctorAuthType = {

@@ -7,6 +7,8 @@ import React from "react";
 import { Button, Text } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import colors from "../../assets/colors";
+import { ResponseType } from "../../helper/types";
+import utils from "../../helper/utils";
 import Index from "../../pages/patients";
 import AppointmentConfirmation from "../../pages/patients/appointments/appointment-confirmation";
 import AppointmentDate from "../../pages/patients/appointments/appointment-date";
@@ -93,6 +95,7 @@ const NavStack = () => {
 const NavDrawer = () => {
     const dispatch = useDispatch();
     const patientAuthReducer = useSelector((state:any)=>state.patientAuth);
+
     const logoutHandler = async(navigation: DrawerNavigationHelpers) => {
         await AsyncStorage.removeItem("patient-auth");
         navigation.dispatch(StackActions.replace('index'))
@@ -100,6 +103,7 @@ const NavDrawer = () => {
         dispatch(appointmentsActions.clearAppointmentsAndDoctors());
         dispatch(medicalFilesActions.clearMedicalFiles());
         dispatch(medicinesActions.clearMedicines())
+        await utils.sendRequest('PATCH', `${utils.BACKEND_URL}/patients/logout`, {}, {'Authorization': `BEARER ${patientAuthReducer.authToken}`});
     }
 
     return <Drawer.Navigator screenOptions={{
@@ -123,12 +127,6 @@ const NavDrawer = () => {
         <Drawer.Screen name="index-drawer" component={NavStack} options={{
             headerShown:false,
             title: 'Home 🏠',
-            swipeEnabled: false,
-            gestureEnabled: false
-        }}/>
-        <Drawer.Screen name="about" component={NavStack} options={{
-            headerShown:false,
-            title: 'Cart 🛒',
             swipeEnabled: false,
             gestureEnabled: false
         }}/>

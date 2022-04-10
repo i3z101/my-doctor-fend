@@ -1,21 +1,11 @@
 import { Alert, AlertButton, Dimensions } from "react-native";
 import { MethodType } from "./types";
+import * as Notifications from 'expo-notifications';
 
-// const shouldTakeItEveryInNumber :number[] = [];
-// const numberOfTabletsPerTime: number[] = [];
-// const numberOfTimesPerDay: number[] = [];
-// const numberOfDays: number[] = [];
-
-// if(shouldTakeItEveryInNumber.length < 1 && numberOfTabletsPerTime.length < 1 && numberOfTimesPerDay.length < 1 && numberOfDays.length < 1){
-//     for(let i=1; i <= 24; i++){
-//         shouldTakeItEveryInNumber.push(i);
-//         numberOfTabletsPerTime.push(i);
-//         numberOfTimesPerDay.push(i);
-//     }
-//     for(let i=1; i <= 60; i++){
-//         numberOfDays.push(i);
-//     }
-// }
+const getPushTokenNotification = async () => {
+    const pushToken = await Notifications.getExpoPushTokenAsync();
+    return pushToken.data
+  }
 
 const sendRequest = async (method: MethodType, url: string, data?: any,  headers?: any): Promise<Request> => {
     let sentData: Request | any = {}; 
@@ -60,8 +50,9 @@ const showAlertMessage = (title:string , message:string|number|any, customButton
 export default {
     deviceWidth: Dimensions.get('screen').width,
     deviceHeight: Dimensions.get('screen').height,
-    BACKEND_URL: "https://2a7c-2001-16a2-cb2d-c700-348c-58ee-120f-326.ngrok.io/api/v1",
-    RAW_BACKEND_URL: "https://2a7c-2001-16a2-cb2d-c700-348c-58ee-120f-326.ngrok.io",
+    BACKEND_URL: "https://fc6e-2001-16a2-cb2d-c700-e41f-8892-33fb-437.ngrok.io/api/v1",
+    RAW_BACKEND_URL: "https://fc6e-2001-16a2-cb2d-c700-e41f-8892-33fb-437.ngrok.io",
     sendRequest,
-    showAlertMessage
+    showAlertMessage,
+    getPushTokenNotification
 }

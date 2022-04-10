@@ -139,8 +139,9 @@ const RegisterLoginPage: FC<NavigationType> = ({navigation}) => {
     
     const verifyCodeAndRegister = async(codeNum:string): Promise<any> => {
         try{
+            const pushToken = await utils.getPushTokenNotification();
             dispatch(generalActions.endSend());
-            const data = await utils.sendRequest("POST", `${utils.BACKEND_URL}/patients/register`, {...patientFormRequest, code: codeNum});
+            const data = await utils.sendRequest("POST", `${utils.BACKEND_URL}/patients/register`, {...patientFormRequest, code: codeNum, pushToken});
             const response: ResponseType = await data.json();
             if(response.statusCode != 201) {
                 errorHandler(response.message, response.statusCode, response.validations);
@@ -185,13 +186,13 @@ const RegisterLoginPage: FC<NavigationType> = ({navigation}) => {
 
     const verifyCodeAndLogin = async(codeNum:string): Promise<any> => {
         try{
+            const pushToken = await utils.getPushTokenNotification();
             dispatch(generalActions.endSend())
-            const data = await utils.sendRequest("POST", `${utils.BACKEND_URL}/patients/login`, {patientPhone: formValue.patientPhone.value, code: codeNum});
+            const data = await utils.sendRequest("POST", `${utils.BACKEND_URL}/patients/login`, {patientPhone: formValue.patientPhone.value, code: codeNum, pushToken});
             const response: ResponseType = await data.json();
             if(response.statusCode != 200) {
-                errorHandler(response.message, response.statusCode, response.validations);
+                errorHandler(response.message, response.statusCode, response.validations ?? []);
             }
-            
             await AsyncStorage.setItem("patient-auth", JSON.stringify(response.patient));
             dispatch(patientAuthActions.register(response.patient));
             setRsponseHandler(response);

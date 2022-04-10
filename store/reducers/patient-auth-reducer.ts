@@ -10,7 +10,8 @@ const initState: PatientAuthType = {
     patientPhone: "",
     patientEmail: "",
     updatePermitted: true,
-    isGuest: true
+    isGuest: true,
+    pushToken: ""
 }
 
 
@@ -34,7 +35,8 @@ const patientAuthReducer: Reducer<PatientAuthType, AnyAction> = (state= initStat
                 patientPhone: "",
                 patientEmail: "",
                 updatePermitted: true,
-                isGuest: false
+                isGuest: false,
+                pushToken: ""
             }
         default:
             return state

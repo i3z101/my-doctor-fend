@@ -86,10 +86,6 @@ const RegisterLoginPage: FC<NavigationType> = ({navigation}) => {
     const autoFocusField5 = useRef<any>();
     const autoFocusField6 = useRef<any>();
 
-    const getPushTokenNotification = async () => {
-        const pushToken = await Notifications.getExpoPushTokenAsync();
-        return pushToken.data
-      }
 
     const onChangeHandler = (value: string, name: string, codeIndex?: number, isLogin?: boolean): void => {
         switch(name) {
@@ -176,7 +172,7 @@ const RegisterLoginPage: FC<NavigationType> = ({navigation}) => {
     
     const verifyCodeAndRegister = async(codeNum:string): Promise<any> => {
         dispatch(generalActions.endSend())
-        const pushToken = await getPushTokenNotification()
+        const pushToken = await utils.getPushTokenNotification()
         const form = new FormData();
         form.append("doctorPhone", formValue.doctorPhone.value.trimEnd())
         form.append("doctorFullName", formValue.doctorFullName.value.trimEnd())
@@ -235,7 +231,7 @@ const RegisterLoginPage: FC<NavigationType> = ({navigation}) => {
     const verifyCodeAndLogin = async(codeNum:string): Promise<any> => {
         dispatch(generalActions.endSend());
         try{
-            const pushToken = await getPushTokenNotification();
+            const pushToken = await utils.getPushTokenNotification();
             const data = await utils.sendRequest("POST", `${utils.BACKEND_URL}/doctors/login`,{doctorPhone: formValue.doctorPhone.value.trimEnd() ,code: codeNum, pushToken});
             const response: ResponseType = await data.json();
             if(response.statusCode != 200) {
@@ -246,7 +242,6 @@ const RegisterLoginPage: FC<NavigationType> = ({navigation}) => {
                 errorHandler(response.message, response.statusCode, response.validations);
             }
             
-            console.log(response.doctor);
             await AsyncStorage.setItem("doctor-auth", JSON.stringify(response.doctor));
             
             dispatch(patientAuthActions.login(response.doctor));

@@ -80,6 +80,7 @@ const IndexComponent: FC<{navigation:NavigationProp<any>}> = ({navigation})=> {
     }, [])
 
     useEffect(()=> {
+        
         if(appointmentsReducer.doctors.length < 1 && patientAuthReducer.authToken != "") {            
             fetchAllData();
         }

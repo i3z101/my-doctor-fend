@@ -503,7 +503,7 @@ const AddMedicinePage: FC<{navigation: NavigationProp<any>, route: Route<any>}> 
                         children = {generalReducer.isSending ? <Spinner /> : null}
                         btnText= {medicineInfo ? "Update" : "Create" }
                         btnTextTwo={medicineInfo ? "Delete" : "Cancel" }
-                        btnLeftAttribute={{disabled:generalReducer.isSending ? true : medicineData.medicineName.value.length < 1 || medicineData.medicineName.validation.length > 0 || 
+                        btnLeftAttribute={{disabled:generalReducer.isSending ? true : medicineData.medicineName.value == "" || 
                             medicineData.timesPerDay == 0 || medicineData.tabletsPerTime == 0 || medicineData.shouldTakeItEvery == 0 ||
                             medicineData.startDate == "" ||  medicineData.numberOfDays == 0 ||
                             medicineData.startTime == "" ? true : false}}

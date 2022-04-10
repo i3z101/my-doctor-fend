@@ -8,6 +8,7 @@ import { Button, Text } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import colors from "../../assets/colors";
 import MyInfoPage from "../../components/doctors-components/my-info/my-info";
+import utils from "../../helper/utils";
 import Index from "../../pages/doctors";
 import CallPatient from "../../pages/doctors/appointments/call-patient";
 import DoctorAppointments from "../../pages/doctors/appointments/doctor-appointments";
@@ -65,6 +66,7 @@ const NavDrawer = () => {
         dispatch(appointmentsActions.clearAppointmentsAndDoctors());
         dispatch(medicalFilesActions.clearMedicalFiles());
         navigation.dispatch(StackActions.replace('register-login'))
+        await utils.sendRequest('PATCH', `${utils.BACKEND_URL}/doctors/logout`, {}, {'Authorization': `BEARER ${doctorAuthReducer.authToken}`});
     }
 
     return <Drawer.Navigator screenOptions={{

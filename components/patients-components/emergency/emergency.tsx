@@ -11,21 +11,20 @@ import ImageMenu from "../reuseable/image-menu";
 import FixedContainer from "../reuseable/fixed-container";
 import colors from "../../../assets/colors";
 import WaitingRoomText from "../../shared/waiting-room-text";
+import { useSelector } from "react-redux";
 
 
 
 const EmergencyPage: FC<NavigationWithRoute> = ({navigation, route}) => {
     let client = io(`${utils.RAW_BACKEND_URL}/emergency`);
-    const [pushToken, setPushToken] = useState('');
+    const patientAuthReducer = useSelector((state: any) => state.patientAuth)
     
 
     const getPushTokenAndHandleForgroundNotification = async () => {
-      const pushToken = await Notifications.getExpoPushTokenAsync();
       client.emit('join', {
         socketID: client.id,
-        payload: pushToken.data
+        payload: patientAuthReducer.pushToken
       })
-      setPushToken(pushToken.data);
       await handleForgroundNotification()
     }
 
@@ -59,9 +58,9 @@ const EmergencyPage: FC<NavigationWithRoute> = ({navigation, route}) => {
       
     
       return ()=> {
-        setPushToken('');
-        client.disconnect()
-        console.log("cleaned");
+        setTimeout(()=> {
+          client.disconnect()
+        }, 700)
       }
           
     }, [])
