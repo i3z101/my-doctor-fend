@@ -56,8 +56,8 @@ const EmergencyPage: FC<NavigationType> = ({navigation}) => {
         })
 
         client.on('patient-join', ()=>{
-            Notifications.requestPermissionsAsync().then(val => {
-              if(val.status == 'granted') {
+          Notifications.requestPermissionsAsync().then(val => {
+            if(val.status == 'granted') {
                 getPushTokenAndHandleForgroundNotification()
               }
             })

@@ -11,10 +11,12 @@ import ImageMenu from "../reuseable/image-menu";
 import FixedContainer from "../reuseable/fixed-container";
 import colors from "../../../assets/colors";
 import WaitingRoomText from "../../shared/waiting-room-text";
+import { useSelector } from "react-redux";
 
 
 
 const CallScreenPage: FC<NavigationWithRoute> = ({navigation, route}) => {
+    const patientAuthReducer = useSelector((state: any) => state.patientAuth); 
     const {roomId} = route.params as any;
     let client = io(`${utils.RAW_BACKEND_URL}/appointments`, {
       query: {
@@ -51,20 +53,12 @@ const CallScreenPage: FC<NavigationWithRoute> = ({navigation, route}) => {
         })
 
         client.on('doctor-join', (args) => {
-          console.log("Hii");
-          Notifications.requestPermissionsAsync().then(val => {
-            if(val.status == 'granted') {
-              Notifications.getExpoPushTokenAsync().then(token => {
-                client.emit('pushToken', {
-                  socketID: client.id,
-                  payload: token.data
-                })
-                callUser()
-              })
-            }
+            client.emit('pushToken', {
+            socketID: client.id,
+            payload: patientAuthReducer.pushToken
           })
-      })
-      
+          callUser()
+        })
     
       return ()=> {
         client.disconnect()

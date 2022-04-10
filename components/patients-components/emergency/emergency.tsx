@@ -43,17 +43,16 @@ const EmergencyPage: FC<NavigationWithRoute> = ({navigation, route}) => {
 
       Notifications.requestPermissionsAsync().then(val => {
         if(val.status == 'granted') {
-          getPushTokenAndHandleForgroundNotification();
+            getPushTokenAndHandleForgroundNotification();
           }
         })
+
         client.on('join', (args) => {
-          Notifications.getExpoPushTokenAsync().then(token => {
             client.emit('pushToken', {
               socketID: client.id,
-              payload: token.data
+              payload: patientAuthReducer.pushToken
             })
             callUser()
-          })
       })
       
     

@@ -32,12 +32,10 @@ const CallPatientPage: FC<NavigationWithRoute> = ({navigation, route}) => {
           client.emit('doctor-join', {
             payload: roomId
           })
-          // callUser(args)
+          callUser(args)
         })
         
         client.on('pushToken', args => {  
-          console.log("jjii");
-          
           callUser(args);
         })
 
